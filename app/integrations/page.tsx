@@ -1,22 +1,33 @@
 'use client';
 
 import { useState } from 'react';
+import { initiateOAuthFlow } from '@/lib/oauth/actions';
 
 export default function Integrations() {
   const [connected, setConnected] = useState<Record<string, boolean>>({
-    gmail: true,
+    gmail: false,
     outlook: false,
-    slack: true,
+    slack: false,
   });
 
   const integrations = [
-    { id: 'gmail', name: 'Gmail', icon: '📧', desc: 'E-poststøtte med Gmail', connected: true },
-    { id: 'outlook', name: 'Outlook', icon: '📧', desc: 'E-poststøtte med Microsoft Outlook', connected: false },
-    { id: 'imap', name: 'IMAP/SMTP', icon: '📧', desc: 'Generisk e-postkonto', connected: false },
-    { id: 'slack', name: 'Slack', icon: '💬', desc: 'Få varsler i Slack-kanaler', connected: true },
-    { id: 'zapier', name: 'Zapier', icon: '⚡', desc: 'Koble til 5000+ apper', connected: false },
-    { id: 'airtable', name: 'Airtable', icon: '📊', desc: 'Sync data til Airtable', connected: false },
+    { id: 'gmail', name: 'Gmail', icon: '📧', desc: 'E-poststøtte med Gmail', connected: false, type: 'email' },
+    { id: 'outlook', name: 'Outlook', icon: '📧', desc: 'E-poststøtte med Microsoft Outlook', connected: false, type: 'email' },
+    { id: 'slack', name: 'Slack', icon: '💬', desc: 'Få varsler i Slack-kanaler', connected: false, type: 'communication' },
+    { id: 'zapier', name: 'Zapier', icon: '⚡', desc: 'Koble til 5000+ apper', connected: false, type: 'automation' },
   ];
+
+  const handleConnect = async (integrationId: string) => {
+    if (integrationId === 'gmail' || integrationId === 'outlook') {
+      try {
+        await initiateOAuthFlow(integrationId as 'gmail' | 'outlook');
+      } catch (error) {
+        console.error(`Failed to initiate ${integrationId} OAuth:`, error);
+      }
+    } else {
+      setConnected({ ...connected, [integrationId]: !connected[integrationId] });
+    }
+  };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0f172a', color: '#f1f5f9', fontFamily: "'DM Sans', sans-serif" }}>
@@ -45,7 +56,7 @@ export default function Integrations() {
         .status-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
         .badge-connected { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         .badge-disconnected { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
-        .integration-button { width: 100%; padding: 0.75rem; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .integration-button { width: 100%; padding: 0.75rem; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
         .btn-connect { background: #10b981; color: white; }
         .btn-connect:hover { background: #059669; }
         .btn-disconnect { background: transparent; color: #ef4444; border: 1px solid #ef4444; }
@@ -85,14 +96,6 @@ export default function Integrations() {
           <h1 className="header-title">Integrasjoner</h1>
         </div>
 
-        <div className="filters">
-          <button className="filter-btn active">Alle</button>
-          <button className="filter-btn">📧 E-post</button>
-          <button className="filter-btn">💬 Kommunikasjon</button>
-          <button className="filter-btn">📊 Data</button>
-          <button className="filter-btn">⚡ Automatisering</button>
-        </div>
-
         <div className="integrations-grid">
           {integrations.map((int) => (
             <div key={int.id} className="integration-card">
@@ -100,15 +103,15 @@ export default function Integrations() {
               <div className="integration-name">{int.name}</div>
               <div className="integration-desc">{int.desc}</div>
               <div className="integration-status">
-                <span className={`status-badge ${int.connected ? 'badge-connected' : 'badge-disconnected'}`}>
-                  {int.connected ? '✓ Koblet' : 'Ikke koblet'}
+                <span className={`status-badge ${connected[int.id] ? 'badge-connected' : 'badge-disconnected'}`}>
+                  {connected[int.id] ? '✓ Koblet' : 'Ikke koblet'}
                 </span>
               </div>
               <button 
-                className={`integration-button ${int.connected ? 'btn-disconnect' : 'btn-connect'}`}
-                onClick={() => setConnected({ ...connected, [int.id]: !connected[int.id] })}
+                className={`integration-button ${connected[int.id] ? 'btn-disconnect' : 'btn-connect'}`}
+                onClick={() => handleConnect(int.id)}
               >
-                {int.connected ? 'Koble fra' : 'Koble til'}
+                {connected[int.id] ? 'Koble fra' : 'Koble til'}
               </button>
             </div>
           ))}
