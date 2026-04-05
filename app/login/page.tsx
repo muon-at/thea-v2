@@ -2,19 +2,24 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { login } from '@/app/auth/actions';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // TODO: Connect to Supabase auth
-    setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 1000);
+    try {
+      await login(email, password);
+      // login() redirects on success
+    } catch (error: any) {
+      alert('Login failed: ' + error.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -211,6 +216,7 @@ export default function Login() {
             <Link href="#" className="form-link">Glemt passord?</Link>
           </div>
 
+          {error && <div style={{ color: '#ef4444', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
           <button type="submit" className="form-button" disabled={loading}>
             {loading ? 'Logger inn...' : 'Logg inn'}
           </button>

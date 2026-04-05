@@ -2,20 +2,25 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { signup } from '@/app/auth/actions';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // TODO: Connect to Supabase auth
-    setTimeout(() => {
-      window.location.href = '/onboarding';
-    }, 1000);
+    try {
+      await signup(email, password, companyName);
+      // signup() redirects on success
+    } catch (error: any) {
+      alert('Signup failed: ' + error.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,12 +34,12 @@ export default function Signup() {
           border-radius: 12px;
           box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
-        
+
         .signup-header {
           text-align: center;
           margin-bottom: 2rem;
         }
-        
+
         .signup-logo {
           font-family: 'Instrument Serif', serif;
           font-size: 1.75rem;
@@ -42,16 +47,16 @@ export default function Signup() {
           margin-bottom: 0.5rem;
           color: #0a0a0f;
         }
-        
+
         .signup-subtitle {
           color: #6b6760;
           font-size: 0.95rem;
         }
-        
+
         .form-group {
           margin-bottom: 1.5rem;
         }
-        
+
         .form-label {
           display: block;
           font-weight: 500;
@@ -59,7 +64,7 @@ export default function Signup() {
           color: #0a0a0f;
           font-size: 0.95rem;
         }
-        
+
         .form-input {
           width: 100%;
           padding: 0.75rem 1rem;
@@ -70,13 +75,13 @@ export default function Signup() {
           transition: all 0.2s;
           color: #0a0a0f;
         }
-        
+
         .form-input:focus {
           outline: none;
           border-color: #7a9e87;
           box-shadow: 0 0 0 3px rgba(122, 158, 135, 0.1);
         }
-        
+
         .form-button {
           width: 100%;
           padding: 0.85rem 1.5rem;
@@ -89,16 +94,16 @@ export default function Signup() {
           transition: all 0.2s;
           font-size: 1rem;
         }
-        
+
         .form-button:hover {
           background: #5a5550;
         }
-        
+
         .form-button:disabled {
           background: #c9c3ba;
           cursor: not-allowed;
         }
-        
+
         .signup-divider {
           display: flex;
           align-items: center;
@@ -106,7 +111,7 @@ export default function Signup() {
           margin: 1.5rem 0;
           color: #9b9590;
         }
-        
+
         .signup-divider::before,
         .signup-divider::after {
           content: '';
@@ -114,13 +119,13 @@ export default function Signup() {
           height: 1px;
           background: #e8e5dc;
         }
-        
+
         .oauth-buttons {
           display: flex;
           gap: 1rem;
           margin-bottom: 1.5rem;
         }
-        
+
         .oauth-button {
           flex: 1;
           padding: 0.75rem;
@@ -132,25 +137,25 @@ export default function Signup() {
           transition: all 0.2s;
           font-size: 0.9rem;
         }
-        
+
         .oauth-button:hover {
           border-color: #7a9e87;
           background: #f9f8f5;
         }
-        
+
         .signup-footer {
           text-align: center;
           margin-top: 1.5rem;
           color: #6b6760;
           font-size: 0.9rem;
         }
-        
+
         .signup-footer a {
           color: #7a9e87;
           text-decoration: none;
           font-weight: 600;
         }
-        
+
         .signup-footer a:hover {
           text-decoration: underline;
         }
@@ -165,8 +170,8 @@ export default function Signup() {
         <form onSubmit={handleSignup}>
           <div className="form-group">
             <label className="form-label">Bedriftsnavn</label>
-            <input
-              type="text"
+            <input 
+              type="text" 
               className="form-input"
               placeholder="Din bedrift AS"
               value={companyName}
@@ -199,6 +204,7 @@ export default function Signup() {
             />
           </div>
 
+          {error && <div style={{ color: '#ef4444', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
           <button type="submit" className="form-button" disabled={loading}>
             {loading ? 'Opprettet....' : 'Opprett konto gratis'}
           </button>
