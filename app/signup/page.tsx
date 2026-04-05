@@ -14,12 +14,12 @@ export default function Signup() {
     setLoading(true);
     // TODO: Connect to Supabase auth
     setTimeout(() => {
-      window.location.href = '/dashboard';
+      window.location.href = '/onboarding';
     }, 1000);
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f2ec', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f5f2ec 0%, #ede9df 100%)', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         .signup-container {
           width: 100%;
