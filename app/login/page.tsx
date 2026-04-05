@@ -34,7 +34,8 @@ export default function Login() {
       // Success - redirect to dashboard
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      console.error('Login fetch error:', err);
+      setError(err.message || 'Network error');
       setLoading(false);
     }
   };

@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation'
 
 export async function signup(email: string, password: string, displayName?: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/signup`, {
+    const response = await fetch(`/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, displayName }),
@@ -30,7 +30,7 @@ export async function signup(email: string, password: string, displayName?: stri
 
 export async function login(email: string, password: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/login`, {
+    const response = await fetch(`/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -52,7 +52,7 @@ export async function login(email: string, password: string) {
 
 export async function logout() {
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/logout`, {
+    await fetch(`/api/auth/logout`, {
       method: 'POST',
     })
 
