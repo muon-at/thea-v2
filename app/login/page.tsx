@@ -13,17 +13,23 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+
     try {
-      await login(email, password);
-      // login() redirects on success
-    } catch (error: any) {
-      alert('Login failed: ' + error.message);
+      const result = await login(email, password);
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+      }
+      // If no error, login will redirect automatically
+    } catch (err) {
+      setError('An unexpected error occurred');
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f2ec', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f5f2ec 0%, #ede9df 100%)', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         .login-container {
           width: 100%;
@@ -73,29 +79,13 @@ export default function Login() {
           font-size: 1rem;
           transition: all 0.2s;
           color: #0a0a0f;
+          box-sizing: border-box;
         }
         
         .form-input:focus {
           outline: none;
           border-color: #7a9e87;
           box-shadow: 0 0 0 3px rgba(122, 158, 135, 0.1);
-        }
-        
-        .form-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.5rem;
-          font-size: 0.9rem;
-        }
-        
-        .form-link {
-          color: #7a9e87;
-          text-decoration: none;
-        }
-        
-        .form-link:hover {
-          text-decoration: underline;
         }
         
         .form-button {
@@ -111,7 +101,7 @@ export default function Login() {
           font-size: 1rem;
         }
         
-        .form-button:hover {
+        .form-button:hover:not(:disabled) {
           background: #5a5550;
         }
         
@@ -120,43 +110,14 @@ export default function Login() {
           cursor: not-allowed;
         }
         
-        .login-divider {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          margin: 1.5rem 0;
-          color: #9b9590;
-        }
-        
-        .login-divider::before,
-        .login-divider::after {
-          content: '';
-          flex: 1;
-          height: 1px;
-          background: #e8e5dc;
-        }
-        
-        .oauth-buttons {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
-        
-        .oauth-button {
-          flex: 1;
+        .error-message {
+          background: #fee;
+          border: 1px solid #fcc;
+          color: #c33;
           padding: 0.75rem;
-          border: 1px solid #e8e5dc;
-          background: white;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all 0.2s;
+          border-radius: 6px;
+          margin-bottom: 1.5rem;
           font-size: 0.9rem;
-        }
-        
-        .oauth-button:hover {
-          border-color: #7a9e87;
-          background: #f9f8f5;
         }
         
         .login-footer {
@@ -183,6 +144,8 @@ export default function Login() {
           <p className="login-subtitle">Logg inn på kontoen din</p>
         </div>
 
+        {error && <div className="error-message">{error}</div>}
+
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label className="form-label">E-postadresse</label>
@@ -193,6 +156,7 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
@@ -205,33 +169,14 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
-          <div className="form-footer">
-            <label>
-              <input type="checkbox" style={{ marginRight: '0.5rem' }} />
-              Husk meg
-            </label>
-            <Link href="#" className="form-link">Glemt passord?</Link>
-          </div>
-
-          {error && <div style={{ color: '#ef4444', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
           <button type="submit" className="form-button" disabled={loading}>
             {loading ? 'Logger inn...' : 'Logg inn'}
           </button>
         </form>
-
-        <div className="login-divider">eller</div>
-
-        <div className="oauth-buttons">
-          <button type="button" className="oauth-button">
-            👤 Google
-          </button>
-          <button type="button" className="oauth-button">
-            👤 Microsoft
-          </button>
-        </div>
 
         <div className="login-footer">
           Har du ikke konto? <Link href="/signup">Opprett konto</Link>

@@ -14,11 +14,17 @@ export default function Signup() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+
     try {
-      await signup(email, password, companyName);
-      // signup() redirects on success
-    } catch (error: any) {
-      alert('Signup failed: ' + error.message);
+      const result = await signup(email, password, companyName);
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+      }
+      // If no error, signup will redirect automatically
+    } catch (err) {
+      setError('An unexpected error occurred');
       setLoading(false);
     }
   };
@@ -34,12 +40,12 @@ export default function Signup() {
           border-radius: 12px;
           box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
-
+        
         .signup-header {
           text-align: center;
           margin-bottom: 2rem;
         }
-
+        
         .signup-logo {
           font-family: 'Instrument Serif', serif;
           font-size: 1.75rem;
@@ -47,16 +53,16 @@ export default function Signup() {
           margin-bottom: 0.5rem;
           color: #0a0a0f;
         }
-
+        
         .signup-subtitle {
           color: #6b6760;
           font-size: 0.95rem;
         }
-
+        
         .form-group {
           margin-bottom: 1.5rem;
         }
-
+        
         .form-label {
           display: block;
           font-weight: 500;
@@ -64,7 +70,7 @@ export default function Signup() {
           color: #0a0a0f;
           font-size: 0.95rem;
         }
-
+        
         .form-input {
           width: 100%;
           padding: 0.75rem 1rem;
@@ -74,14 +80,15 @@ export default function Signup() {
           font-size: 1rem;
           transition: all 0.2s;
           color: #0a0a0f;
+          box-sizing: border-box;
         }
-
+        
         .form-input:focus {
           outline: none;
           border-color: #7a9e87;
           box-shadow: 0 0 0 3px rgba(122, 158, 135, 0.1);
         }
-
+        
         .form-button {
           width: 100%;
           padding: 0.85rem 1.5rem;
@@ -94,68 +101,39 @@ export default function Signup() {
           transition: all 0.2s;
           font-size: 1rem;
         }
-
-        .form-button:hover {
+        
+        .form-button:hover:not(:disabled) {
           background: #5a5550;
         }
-
+        
         .form-button:disabled {
           background: #c9c3ba;
           cursor: not-allowed;
         }
-
-        .signup-divider {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          margin: 1.5rem 0;
-          color: #9b9590;
-        }
-
-        .signup-divider::before,
-        .signup-divider::after {
-          content: '';
-          flex: 1;
-          height: 1px;
-          background: #e8e5dc;
-        }
-
-        .oauth-buttons {
-          display: flex;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .oauth-button {
-          flex: 1;
+        
+        .error-message {
+          background: #fee;
+          border: 1px solid #fcc;
+          color: #c33;
           padding: 0.75rem;
-          border: 1px solid #e8e5dc;
-          background: white;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all 0.2s;
+          border-radius: 6px;
+          margin-bottom: 1.5rem;
           font-size: 0.9rem;
         }
-
-        .oauth-button:hover {
-          border-color: #7a9e87;
-          background: #f9f8f5;
-        }
-
+        
         .signup-footer {
           text-align: center;
           margin-top: 1.5rem;
           color: #6b6760;
           font-size: 0.9rem;
         }
-
+        
         .signup-footer a {
           color: #7a9e87;
           text-decoration: none;
           font-weight: 600;
         }
-
+        
         .signup-footer a:hover {
           text-decoration: underline;
         }
@@ -167,16 +145,19 @@ export default function Signup() {
           <p className="signup-subtitle">Opprett konto og kom i gang på 5 minutter</p>
         </div>
 
+        {error && <div className="error-message">{error}</div>}
+
         <form onSubmit={handleSignup}>
           <div className="form-group">
             <label className="form-label">Bedriftsnavn</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               className="form-input"
               placeholder="Din bedrift AS"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
@@ -189,6 +170,7 @@ export default function Signup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
@@ -201,25 +183,14 @@ export default function Signup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
-          {error && <div style={{ color: '#ef4444', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
           <button type="submit" className="form-button" disabled={loading}>
-            {loading ? 'Opprettet....' : 'Opprett konto gratis'}
+            {loading ? 'Oppretter....' : 'Opprett konto gratis'}
           </button>
         </form>
-
-        <div className="signup-divider">eller</div>
-
-        <div className="oauth-buttons">
-          <button className="oauth-button">
-            👤 Google
-          </button>
-          <button className="oauth-button">
-            👤 Microsoft
-          </button>
-        </div>
 
         <div className="signup-footer">
           Har du allerede konto? <Link href="/login">Logg inn</Link>
