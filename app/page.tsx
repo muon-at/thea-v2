@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -457,7 +458,9 @@ export default function Home() {
           <a href="#funksjoner" className="nav-link">Funksjoner</a>
           <a href="#priser" className="nav-link">Priser</a>
           <a href="#kontakt" className="nav-link">Kontakt</a>
-          <button className="nav-cta">Kom i gang →</button>
+          <Link href="/login" style={{ textDecoration: 'none' }}>
+            <button className="nav-cta">Kom i gang →</button>
+          </Link>
         </div>
         <button className="menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>☰</button>
       </nav>
@@ -474,7 +477,9 @@ export default function Home() {
         </p>
         
         <div className="hero-cta">
-          <button className="btn-primary">Start gratis i dag →</button>
+          <Link href="/signup" style={{ textDecoration: 'none' }}>
+            <button className="btn-primary">Start gratis i dag →</button>
+          </Link>
           <button className="btn-secondary">Se demo</button>
         </div>
 
@@ -599,7 +604,9 @@ export default function Home() {
               <li>Grunnleggende analytics</li>
               <li>E-poststøtte</li>
             </ul>
-            <button className="price-cta">Start gratis</button>
+            <Link href="/signup" style={{ textDecoration: 'none' }}>
+              <button className="price-cta">Start gratis</button>
+            </Link>
           </div>
           
           <div className="pricing-card featured">
@@ -613,7 +620,9 @@ export default function Home() {
               <li>Slack integrasjon</li>
               <li>Prioritert support</li>
             </ul>
-            <button className="price-cta" style={{ background: '#7a9e87' }}>Start gratis</button>
+            <Link href="/signup" style={{ textDecoration: 'none' }}>
+              <button className="price-cta" style={{ background: '#7a9e87' }}>Start gratis</button>
+            </Link>
           </div>
           
           <div className="pricing-card">
@@ -641,9 +650,11 @@ export default function Home() {
           <p style={{ color: '#6b6760', marginBottom: '1.5rem' }}>
             Sett opp på 5 minutter. Ingen kredittkort nødvendig for prøveperioden.
           </p>
-          <button className="btn-primary" style={{ width: '100%' }}>
-            Start 14-dagers gratis prøve →
-          </button>
+          <Link href="/signup" style={{ textDecoration: 'none', display: 'block' }}>
+            <button className="btn-primary" style={{ width: '100%' }}>
+              Start 14-dagers gratis prøve →
+            </button>
+          </Link>
         </div>
       </section>
 
