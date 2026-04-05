@@ -2,57 +2,14 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-
-// Error that Next.js throws on redirect - don't catch it
-class NextRedirectError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'NEXT_REDIRECT'
-  }
-}
-
-// Helper to safely get cookie headers
-function getSafeHeaders(cookieStore: Awaited<ReturnType<typeof cookies>>) {
-  try {
-    return cookieStore.getAll()
-  } catch (error) {
-    console.error('Failed to get cookies:', error)
-    return []
-  }
-}
+import { createClient } from '@supabase/supabase-js'
 
 export async function signup(email: string, password: string, displayName?: string) {
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
+  const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return getSafeHeaders(cookieStore)
-        },
-        setAll(cookiesToSet) {
-          try {
-            if (!Array.isArray(cookiesToSet)) return
-            cookiesToSet.forEach(({ name, value, options }) => {
-              try {
-                cookieStore.set(name, value, options)
-              } catch (e) {
-                console.error(`Failed to set cookie ${name}:`, e)
-              }
-            })
-          } catch (e) {
-            console.error('Cookie error:', e)
-          }
-        },
-      },
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
-  // Sign up user
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -77,32 +34,9 @@ export async function signup(email: string, password: string, displayName?: stri
 }
 
 export async function login(email: string, password: string) {
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
+  const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return getSafeHeaders(cookieStore)
-        },
-        setAll(cookiesToSet) {
-          try {
-            if (!Array.isArray(cookiesToSet)) return
-            cookiesToSet.forEach(({ name, value, options }) => {
-              try {
-                cookieStore.set(name, value, options)
-              } catch (e) {
-                console.error(`Failed to set cookie ${name}:`, e)
-              }
-            })
-          } catch (e) {
-            console.error('Cookie error:', e)
-          }
-        },
-      },
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -115,7 +49,8 @@ export async function login(email: string, password: string) {
     return { error: error.message || 'Login failed' }
   }
 
-  if (data?.user?.id) {
+  if (data?.user?.id && data?.session) {
+    // Session exists, redirect
     revalidatePath('/', 'layout')
     redirect('/dashboard')
   }
@@ -124,30 +59,12 @@ export async function login(email: string, password: string) {
 }
 
 export async function logout() {
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
+  const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // Ignore errors
-          }
-        },
-      },
-    }
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
   await supabase.auth.signOut()
   revalidatePath('/', 'layout')
-  redirect('/')
+  redirect('/login')
 }
