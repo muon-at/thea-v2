@@ -3,33 +3,31 @@ import { NextRequest, NextResponse } from 'next/server'
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Admin routes
-  if (pathname.startsWith('/admin')) {
-    const adminUser = request.cookies.get('admin_user')?.value
-    const userId = request.cookies.get('auth_user_id')?.value
+  // Check for auth session cookie
+  const authSession = request.cookies.get('auth_session')?.value
 
-    // If accessing admin route without auth, redirect to login
-    if (!userId) {
+  // Protected routes
+  const protectedRoutes = [
+    '/admin',
+    '/dashboard',
+    '/integrations',
+    '/settings',
+    '/analytics',
+    '/onboarding',
+  ]
+
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+
+  if (isProtectedRoute) {
+    // If no session, redirect to login
+    if (!authSession) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
-
-    // In production, we'd verify admin status in the page component
-    // For now, we just ensure user is authenticated
   }
 
-  // Protect customer routes
-  if (
-    pathname.startsWith('/dashboard') ||
-    pathname.startsWith('/integrations') ||
-    pathname.startsWith('/settings') ||
-    pathname.startsWith('/analytics') ||
-    pathname.startsWith('/onboarding')
-  ) {
-    const userId = request.cookies.get('auth_user_id')?.value
-    
-    if (!userId) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
+  // If logged in, don't allow access to login/signup
+  if ((pathname === '/login' || pathname === '/signup') && authSession) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return NextResponse.next()
@@ -43,5 +41,7 @@ export const config = {
     '/settings/:path*',
     '/analytics/:path*',
     '/onboarding/:path*',
+    '/login',
+    '/signup',
   ],
 }

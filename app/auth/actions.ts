@@ -2,133 +2,64 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+
+// Server actions now call backend API endpoints
+// This keeps Supabase SDK and JSON parsing on the server side only
 
 export async function signup(email: string, password: string, displayName?: string) {
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch (error) {
-            // Silently ignore cookie errors
-          }
-        },
-      },
-    }
-  )
-
   try {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          display_name: displayName || '',
-        },
-      },
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, displayName }),
     })
 
-    if (error) {
-      console.error('Signup error:', error.message)
-      return { error: error.message }
+    const data = await response.json()
+
+    if (!response.ok) {
+      return { error: data.error || 'Signup failed' }
     }
 
-    if (data?.user) {
-      revalidatePath('/', 'layout')
-      redirect('/onboarding')
-    }
-
-    return { error: 'Signup failed' }
+    revalidatePath('/', 'layout')
+    redirect('/onboarding')
   } catch (error: any) {
-    console.error('Signup exception:', error.message)
+    console.error('Signup error:', error)
     return { error: error.message || 'Signup failed' }
   }
 }
 
 export async function login(email: string, password: string) {
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch (error) {
-            // Silently ignore cookie errors
-          }
-        },
-      },
-    }
-  )
-
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
     })
 
-    if (error) {
-      console.error('Login error:', error.message)
-      return { error: error.message }
+    const data = await response.json()
+
+    if (!response.ok) {
+      return { error: data.error || 'Login failed' }
     }
 
-    if (data?.user) {
-      revalidatePath('/', 'layout')
-      redirect('/dashboard')
-    }
-
-    return { error: 'Login failed' }
+    revalidatePath('/', 'layout')
+    redirect('/dashboard')
   } catch (error: any) {
-    console.error('Login exception:', error.message)
+    console.error('Login error:', error)
     return { error: error.message || 'Login failed' }
   }
 }
 
 export async function logout() {
-  const cookieStore = await cookies()
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/logout`, {
+      method: 'POST',
+    })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch (error) {
-            // Silently ignore cookie errors
-          }
-        },
-      },
-    }
-  )
-
-  await supabase.auth.signOut()
-  revalidatePath('/', 'layout')
-  redirect('/login')
+    revalidatePath('/', 'layout')
+    redirect('/login')
+  } catch (error: any) {
+    console.error('Logout error:', error)
+    redirect('/login')
+  }
 }
