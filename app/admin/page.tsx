@@ -1,109 +1,100 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import AdminSidebar from './components/AdminSidebar'
 
-export default function AdminDashboard() {
-  const [companies, setCompanies] = useState([])
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
+// Mock data
+const mockCompanies = [
+  {
+    id: '1',
+    name: 'Acme Corp',
+    logo: 'AC',
+    color: '#b8ff57',
+    plan: 'Premium',
+    status: 'active',
+    apiCostMonth: 156.78,
+    emailsToday: 45,
+    agents: 1,
+    responseTime: 2.3,
+    satisfaction: 95,
+  },
+  {
+    id: '2',
+    name: 'Tech Startup',
+    logo: 'TS',
+    color: '#4d9eff',
+    plan: 'Free',
+    status: 'active',
+    apiCostMonth: 87.45,
+    emailsToday: 23,
+    agents: 1,
+    responseTime: 1.8,
+    satisfaction: 88,
+  },
+]
 
-  useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        const response = await fetch('/api/admin/companies', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        })
-        
-        if (!response.ok) {
-          if (response.status === 401) {
-            router.push('/login')
-            return
-          }
-          throw new Error('Failed to fetch companies')
-        }
-        
-        const data = await response.json()
-        setCompanies(data.companies || [])
-      } catch (error) {
-        console.error('Error fetching companies:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    
-    fetchCompanies()
-  }, [router])
+const totalCostMonth = mockCompanies.reduce((a, c) => a + c.apiCostMonth, 0)
+const totalEmailsToday = mockCompanies.reduce((a, c) => a + c.emailsToday, 0)
+const avgSatisfaction = Math.round(mockCompanies.reduce((a, c) => a + c.satisfaction, 0) / mockCompanies.length)
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>
-  }
+export default function AdminOverview() {
+  const [companies, setCompanies] = useState(mockCompanies)
 
   return (
-    <div className="flex h-screen bg-white">
-      <AdminSidebar />
-      
-      <main className="flex-1 overflow-auto">
-        <div className="border-b border-[#e8e5dc] bg-white sticky top-0 z-10">
-          <div className="px-8 py-6">
-            <h1 className="text-3xl font-bold text-[#0a0a0f] mb-1">Oversikt</h1>
-            <p className="text-sm text-[#6b6760]">Bedriftadministrasjon og system oversikt</p>
+    <div className="p-6 space-y-6">
+      {/* TOP STATS */}
+      <div className="grid grid-cols-4 gap-4">
+        {[
+          { label: 'Total API-kost / mnd', value: `${totalCostMonth.toFixed(2)} kr`, sub: '+12% fra forrige mnd', color: '#b8ff57', icon: '◎' },
+          { label: 'Eposter behandlet i dag', value: totalEmailsToday, sub: `${totalEmailsToday} løst av AI (100%)`, color: '#4d9eff', icon: '✉' },
+          { label: 'Aktive bedrifter', value: companies.filter(c => c.status === 'active').length, sub: `${companies.length} total`, color: '#f472b6', icon: '⬡' },
+          { label: 'Kundestilfredshet', value: `${avgSatisfaction}%`, sub: 'Snitt alle bedrifter', color: '#a78bfa', icon: '◉' },
+        ].map((stat, i) => (
+          <div key={i} className="bg-[#0f0f1a] border border-white/[0.06] rounded-xl p-5 hover:border-white/10 transition-colors">
+            <div className="flex items-start justify-between mb-3">
+              <span className="text-xs text-white/30 font-medium tracking-wide uppercase">{stat.label}</span>
+              <span className="text-base" style={{ color: stat.color }}>{stat.icon}</span>
+            </div>
+            <div className="text-3xl font-bold tracking-tight mb-1" style={{ color: stat.color }}>{stat.value}</div>
+            <div className="text-[11px] text-white/30 font-mono">{stat.sub}</div>
           </div>
+        ))}
+      </div>
+
+      {/* COMPANIES TABLE */}
+      <div className="bg-[#0f0f1a] border border-white/[0.06] rounded-xl p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold text-white">Bedrifter – denne måneden</h3>
+          <span className="text-[10px] text-white/30 font-mono border border-white/10 px-2 py-1 rounded-md">Sorter: API-kost ↓</span>
         </div>
-
-        <div className="p-8 space-y-8">
-          {/* Summary Stats */}
-          <div className="grid grid-cols-4 gap-4">
-            <div className="bg-[#f5f2ec] rounded-xl p-6 border border-[#e8e5dc]">
-              <p className="text-xs font-medium text-[#6b6760] uppercase tracking-wide mb-2">Total bedrifter</p>
-              <p className="text-3xl font-bold text-[#0a0a0f]">{companies.length}</p>
-            </div>
-            <div className="bg-[#f5f2ec] rounded-xl p-6 border border-[#e8e5dc]">
-              <p className="text-xs font-medium text-[#6b6760] uppercase tracking-wide mb-2">Aktive agenter</p>
-              <p className="text-3xl font-bold text-[#0a0a0f]">{companies.length}</p>
-            </div>
-            <div className="bg-[#f5f2ec] rounded-xl p-6 border border-[#e8e5dc]">
-              <p className="text-xs font-medium text-[#6b6760] uppercase tracking-wide mb-2">Total budsjett</p>
-              <p className="text-3xl font-bold text-[#0a0a0f]">${companies.reduce((sum: number, c: any) => sum + (c.monthly_budget || 0), 0)}</p>
-            </div>
-            <div className="bg-[#f5f2ec] rounded-xl p-6 border border-[#e8e5dc]">
-              <p className="text-xs font-medium text-[#6b6760] uppercase tracking-wide mb-2">Premium tier</p>
-              <p className="text-3xl font-bold text-[#0a0a0f]">{companies.filter((c: any) => c.subscription_tier === 'premium').length}</p>
-            </div>
-          </div>
-
-          {/* Companies Grid */}
-          <div className="bg-white rounded-xl border border-[#e8e5dc] overflow-hidden">
-            <div className="px-8 py-6 border-b border-[#e8e5dc]">
-              <h2 className="text-xl font-bold text-[#0a0a0f]">Bedrifter</h2>
-            </div>
-            <div className="divide-y divide-[#e8e5dc]">
-              {companies.length > 0 ? (
-                companies.map((company: any) => (
-                  <div key={company.id} className="px-8 py-4 hover:bg-[#f5f2ec] transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold text-[#0a0a0f]">{company.name}</h3>
-                        <p className="text-sm text-[#6b6760] mt-1">{company.email}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs font-medium bg-[#7a9e87]/10 text-[#7a9e87] px-3 py-1 rounded-lg">{company.subscription_tier}</span>
-                        <p className="text-sm font-semibold text-[#0a0a0f] mt-2">${company.monthly_budget}/month</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="px-8 py-12 text-center">
-                  <p className="text-[#6b6760]">Ingen bedrifter ennå</p>
+        <div className="space-y-2">
+          {[...companies].sort((a, b) => b.apiCostMonth - a.apiCostMonth).map((c, i) => (
+            <div key={c.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/[0.03] transition-colors group cursor-pointer">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-black flex-shrink-0" style={{ background: c.color }}>{c.logo}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-white truncate">{c.name}</span>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${c.status === 'active' ? 'bg-[#b8ff57]/10 text-[#b8ff57]' : 'bg-[#a78bfa]/10 text-[#a78bfa]'}`}>
+                    {c.plan.toUpperCase()}
+                  </span>
                 </div>
-              )}
+                <div className="flex items-center gap-3 mt-0.5">
+                  <span className="text-[10px] text-white/30 font-mono">{c.emailsToday} eposter i dag</span>
+                  <span className="text-[10px] text-white/30 font-mono">{c.agents} agent</span>
+                  <span className="text-[10px] text-white/30 font-mono">{c.responseTime}s snitt</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-bold" style={{ color: c.color }}>{c.apiCostMonth.toFixed(2)} kr</div>
+                <div className="text-[10px] text-white/30 font-mono">denne mnd</div>
+              </div>
+              {/* Cost bar */}
+              <div className="w-16 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                <div className="h-full rounded-full" style={{ width: `${(c.apiCostMonth / 200) * 100}%`, background: c.color }} />
+              </div>
             </div>
-          </div>
+          ))}
         </div>
-      </main>
+      </div>
     </div>
   )
 }
