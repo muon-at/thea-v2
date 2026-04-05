@@ -140,7 +140,7 @@ export default function Login() {
         <p className="subtitle">Logg inn på kontoen din</p>
 
         <form onSubmit={handleLogin}>
-          {error && <div className="error-message">{error}</div>}
+          {error && !error.includes('NEXT_REDIRECT') && <div className="error-message">{error}</div>}
 
           <div className="form-group">
             <label className="form-label">E-postadresse</label>

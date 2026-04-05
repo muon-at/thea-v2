@@ -141,7 +141,7 @@ export default function Signup() {
         <p className="subtitle">Opprett konto gratis</p>
 
         <form onSubmit={handleSignup}>
-          {error && <div className="error-message">{error}</div>}
+          {error && !error.includes('NEXT_REDIRECT') && <div className="error-message">{error}</div>}
 
           <div className="form-group">
             <label className="form-label">Bedriftsnavn</label>
