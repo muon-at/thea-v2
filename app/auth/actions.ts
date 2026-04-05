@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createServerClient, serializeCookieHeader } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 export async function signup(email: string, password: string, displayName?: string) {
@@ -21,8 +21,8 @@ export async function signup(email: string, password: string, displayName?: stri
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
-          } catch {
-            // Ignore errors setting cookies
+          } catch (e) {
+            console.error('Cookie error:', e)
           }
         },
       },
@@ -68,8 +68,8 @@ export async function login(email: string, password: string) {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
-          } catch {
-            // Ignore errors
+          } catch (e) {
+            console.error('Cookie error:', e)
           }
         },
       },
