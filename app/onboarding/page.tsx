@@ -1,430 +1,186 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Onboarding() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState({
     companyName: '',
-    companyEmail: '',
     agentName: '',
-    agentTone: 'professional',
-    primaryEmail: '',
-    primaryEmailPassword: '',
-    integrations: [],
+    tone: 'professional',
+    signature: '',
+    emailProvider: '',
   });
 
   const handleNext = () => {
-    if (step < 7) setStep(step + 1);
-    else window.location.href = '/dashboard';
+    if (step < 5) {
+      setStep(step + 1);
+    } else {
+      // Complete onboarding
+      router.push('/dashboard');
+    }
   };
 
-  const handlePrev = () => {
-    if (step > 1) setStep(step - 1);
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+    }
   };
-
-  const updateForm = (key: string, value: any) => {
-    setFormData({ ...formData, [key]: value });
-  };
-
-  const progress = (step / 7) * 100;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1a2c4a 100%)', color: '#f1f5f9', fontFamily: "'DM Sans', sans-serif", padding: '2rem' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: '#f1f5f9', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <style>{`
-        .onboarding-container {
-          max-width: 600px;
-          margin: 0 auto;
-          background: #1e293b;
-          border-radius: 16px;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-          overflow: hidden;
-          border: 1px solid #334155;
-        }
-        
-        .onboarding-header {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          padding: 2rem;
-          text-align: center;
-          border-bottom: 1px solid #334155;
-        }
-        
-        .onboarding-logo {
-          font-family: 'Instrument Serif', serif;
-          font-size: 2rem;
-          font-weight: 600;
-          margin-bottom: 1rem;
-          color: white;
-        }
-        
-        .onboarding-subtitle {
-          color: rgba(255,255,255,0.9);
-          font-size: 0.95rem;
-        }
-        
-        .progress-bar {
-          height: 4px;
-          background: #334155;
-          position: relative;
-        }
-        
-        .progress-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-          transition: width 0.3s ease;
-        }
-        
-        .onboarding-content {
-          padding: 2.5rem;
-          min-height: 400px;
-        }
-        
-        .step-title {
-          font-family: 'Instrument Serif', serif;
-          font-size: 1.75rem;
-          margin-bottom: 0.5rem;
-          color: #f1f5f9;
-        }
-        
-        .step-desc {
-          color: #cbd5e1;
-          margin-bottom: 2rem;
-          font-size: 0.95rem;
-        }
-        
-        .form-group {
-          margin-bottom: 1.5rem;
-        }
-        
-        .form-label {
-          display: block;
-          font-weight: 500;
-          margin-bottom: 0.75rem;
-          color: #cbd5e1;
-        }
-        
-        .form-input, .form-select {
-          width: 100%;
-          padding: 1rem;
-          background: #0f172a;
-          border: 2px solid #334155;
-          border-radius: 8px;
-          color: #f1f5f9;
-          font-family: 'DM Sans', sans-serif;
-          font-size: 1rem;
-          transition: all 0.2s;
-        }
-        
-        .form-input:focus, .form-select:focus {
-          outline: none;
-          border-color: #10b981;
-          box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-        }
-        
-        .checkbox-group {
-          display: flex;
-          align-items: center;
-          padding: 1rem;
-          background: #0f172a;
-          border: 2px solid #334155;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s;
-          margin-bottom: 0.75rem;
-        }
-        
-        .checkbox-group:hover {
-          border-color: #10b981;
-          background: rgba(16, 185, 129, 0.05);
-        }
-        
-        .checkbox-group input {
-          margin-right: 1rem;
-          cursor: pointer;
-          width: 20px;
-          height: 20px;
-        }
-        
-        .checkbox-label {
-          flex: 1;
-          cursor: pointer;
-        }
-        
-        .checkbox-label-title {
-          font-weight: 500;
-          color: #f1f5f9;
-        }
-        
-        .checkbox-label-desc {
-          font-size: 0.85rem;
-          color: #94a3b8;
-          margin-top: 0.25rem;
-        }
-        
-        .onboarding-footer {
-          padding: 2rem;
-          background: #0f172a;
-          border-top: 1px solid #334155;
-          display: flex;
-          gap: 1rem;
-          justify-content: space-between;
-        }
-        
-        .btn {
-          padding: 1rem 2rem;
-          border-radius: 8px;
-          border: none;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-          font-family: 'DM Sans', sans-serif;
-        }
-        
-        .btn-secondary {
-          background: transparent;
-          color: #cbd5e1;
-          border: 2px solid #334155;
-        }
-        
-        .btn-secondary:hover {
-          border-color: #10b981;
-          color: #10b981;
-        }
-        
-        .btn-primary {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          color: white;
-          flex: 1;
-        }
-        
-        .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-primary:disabled {
-          background: #64748b;
-          cursor: not-allowed;
-          transform: none;
-        }
-        
-        .step-counter {
-          text-align: center;
-          color: #94a3b8;
-          font-size: 0.9rem;
-          margin-top: 1.5rem;
-        }
+        .onboarding-container { max-width: 600px; width: 100%; }
+        .progress-bar { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
+        .progress-step { flex: 1; height: 4px; background: #334155; border-radius: 2px; transition: all 0.3s; }
+        .progress-step.active { background: #10b981; }
+        .progress-step.completed { background: #10b981; }
+        .onboarding-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2rem; }
+        .step-title { font-family: 'Instrument Serif', serif; font-size: 1.75rem; margin-bottom: 0.5rem; color: #f1f5f9; }
+        .step-description { color: #94a3b8; margin-bottom: 2rem; font-size: 1rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; font-weight: 500; margin-bottom: 0.75rem; color: #f1f5f9; }
+        .form-input { width: 100%; padding: 0.75rem; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; border-radius: 6px; font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
+        .form-input:focus { outline: none; border-color: #10b981; }
+        .form-select { width: 100%; padding: 0.75rem; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; border-radius: 6px; font-family: 'DM Sans', sans-serif; }
+        .form-select:focus { outline: none; border-color: #10b981; }
+        .button-group { display: flex; gap: 1rem; justify-content: space-between; margin-top: 2rem; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+        .btn-primary { background: #10b981; color: white; flex: 1; }
+        .btn-primary:hover { background: #059669; }
+        .btn-secondary { background: transparent; color: #cbd5e1; border: 1px solid #334155; }
+        .btn-secondary:hover { border-color: #10b981; color: #10b981; }
+        .checklist { list-style: none; padding: 0; }
+        .checklist li { padding: 0.75rem 0; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 0.75rem; }
+        .checklist li:last-child { border-bottom: none; }
+        .checklist-icon { font-size: 1.5rem; }
       `}</style>
 
       <div className="onboarding-container">
-        <div className="onboarding-header">
-          <div className="onboarding-logo">🚀 Thea</div>
-          <p className="onboarding-subtitle">Sett opp din AI email agent på 5 minutter</p>
-        </div>
-        
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+          {[1, 2, 3, 4, 5].map((s) => (
+            <div
+              key={s}
+              className={`progress-step ${s <= step ? 'active' : ''} ${s < step ? 'completed' : ''}`}
+            />
+          ))}
         </div>
 
-        <div className="onboarding-content">
-          {/* Step 1: Bedriftsnavn */}
+        <div className="onboarding-card">
           {step === 1 && (
             <>
-              <h2 className="step-title">Bedriftsinfo</h2>
-              <p className="step-desc">Fortell oss om bedriften din</p>
+              <h1 className="step-title">Velkommen til Thea! 👋</h1>
+              <p className="step-description">La oss sette opp agenten din på 5 minutter</p>
+              
+              <ul className="checklist">
+                <li><span className="checklist-icon">✓</span> Konfigurer bedriftsinformasjon</li>
+                <li><span className="checklist-icon">✓</span> Lag din personlig agent</li>
+                <li><span className="checklist-icon">✓</span> Koble til e-postkonto</li>
+                <li><span className="checklist-icon">✓</span> Sett tone og stil</li>
+                <li><span className="checklist-icon">✓</span> Ferdig!</li>
+              </ul>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <h1 className="step-title">Bedriftsinformasjon</h1>
+              <p className="step-description">Hva heter bedriften din?</p>
               
               <div className="form-group">
                 <label className="form-label">Bedriftsnavn</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="form-input"
-                  placeholder="f.eks. Din Bedrift AS"
+                  placeholder="f.eks. Acme Corp"
                   value={formData.companyName}
-                  onChange={(e) => updateForm('companyName', e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Bedrifts-e-postadresse</label>
-                <input 
-                  type="email" 
-                  className="form-input"
-                  placeholder="hallo@dinbedrift.no"
-                  value={formData.companyEmail}
-                  onChange={(e) => updateForm('companyEmail', e.target.value)}
+                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                 />
               </div>
             </>
           )}
 
-          {/* Step 2: Agent navn og tone */}
-          {step === 2 && (
+          {step === 3 && (
             <>
-              <h2 className="step-title">Agentinnstillinger</h2>
-              <p className="step-desc">Tilpass agenten til ditt brand</p>
+              <h1 className="step-title">Agentens navn</h1>
+              <p className="step-description">Hva skal agenten hete?</p>
               
               <div className="form-group">
-                <label className="form-label">Agentens navn</label>
-                <input 
-                  type="text" 
+                <label className="form-label">Agent navn</label>
+                <input
+                  type="text"
                   className="form-input"
-                  placeholder="f.eks. Thea"
+                  placeholder="f.eks. Alex"
                   value={formData.agentName}
-                  onChange={(e) => updateForm('agentName', e.target.value)}
+                  onChange={(e) => setFormData({ ...formData, agentName: e.target.value })}
                 />
               </div>
+            </>
+          )}
 
+          {step === 4 && (
+            <>
+              <h1 className="step-title">Agent Tone</h1>
+              <p className="step-description">Hvordan skal agenten snakke?</p>
+              
               <div className="form-group">
-                <label className="form-label">Agentens tone</label>
-                <select 
+                <label className="form-label">Tone</label>
+                <select
                   className="form-select"
-                  value={formData.agentTone}
-                  onChange={(e) => updateForm('agentTone', e.target.value)}
+                  value={formData.tone}
+                  onChange={(e) => setFormData({ ...formData, tone: e.target.value })}
                 >
                   <option value="professional">Profesjonell</option>
                   <option value="friendly">Vennlig</option>
                   <option value="casual">Uformell</option>
-                  <option value="technical">Teknisk</option>
                 </select>
               </div>
-            </>
-          )}
-
-          {/* Step 3: Primær e-post */}
-          {step === 3 && (
-            <>
-              <h2 className="step-title">Primær e-postkonto</h2>
-              <p className="step-desc">Koble til din e-postkonto for at agenten skal fungere</p>
-              
-              <div className="form-group">
-                <label className="form-label">E-postadresse</label>
-                <input 
-                  type="email" 
-                  className="form-input"
-                  placeholder="bruker@gmail.com eller bruker@outlook.com"
-                  value={formData.primaryEmail}
-                  onChange={(e) => updateForm('primaryEmail', e.target.value)}
-                />
-              </div>
 
               <div className="form-group">
-                <label className="form-label">Passord eller App-passord</label>
-                <input 
-                  type="password" 
+                <label className="form-label">E-postsignatur (valgfritt)</label>
+                <textarea
                   className="form-input"
-                  placeholder="••••••••••••••••"
-                  value={formData.primaryEmailPassword}
-                  onChange={(e) => updateForm('primaryEmailPassword', e.target.value)}
+                  placeholder="Din signatur her"
+                  value={formData.signature}
+                  onChange={(e) => setFormData({ ...formData, signature: e.target.value })}
+                  style={{ minHeight: '80px', fontFamily: "'DM Sans', sans-serif" }}
                 />
-                <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.75rem' }}>
-                  💡 For Gmail: Bruk <a href="#" style={{ color: '#10b981' }}>App Password</a>. For Outlook: Bruk passord eller 2-faktor-kode.
-                </p>
               </div>
             </>
           )}
 
-          {/* Step 4: Integrasjoner */}
-          {step === 4 && (
-            <>
-              <h2 className="step-title">Integrering</h2>
-              <p className="step-desc">Koble til andre tjenester (valgfritt)</p>
-              
-              {['Slack', 'Zapier', 'Google Drive', 'Airtable'].map((int) => (
-                <label key={int} className="checkbox-group">
-                  <input 
-                    type="checkbox" 
-                    checked={formData.integrations.includes(int)}
-                    onChange={(e: any) => {
-                      if (e.target.checked) {
-                        updateForm('integrations', [...(formData.integrations || []), int]);
-                      } else {
-                        updateForm('integrations', (formData.integrations || []).filter((i: string) => i !== int));
-                      }
-                    }}
-                  />
-                  <div className="checkbox-label">
-                    <div className="checkbox-label-title">{int}</div>
-                    <div className="checkbox-label-desc">Integrer med {int}</div>
-                  </div>
-                </label>
-              ))}
-            </>
-          )}
-
-          {/* Step 5: Training */}
           {step === 5 && (
             <>
-              <h2 className="step-title">Trening</h2>
-              <p className="step-desc">Thea lærer av din e-posthistorikk</p>
+              <h1 className="step-title">Ferdig! 🎉</h1>
+              <p className="step-description">Din agent er nå klar til bruk</p>
               
-              <div style={{ background: '#0f172a', padding: '1.5rem', borderRadius: '8px', border: '2px solid #334155', marginBottom: '1.5rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📚</div>
-                <p style={{ color: '#cbd5e1', marginBottom: '0.5rem' }}>Analyserer e-posthistorikk...</p>
-                <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Dette tar ca. 1-2 minutter</p>
-              </div>
-
-              <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '2px solid #10b981', padding: '1rem', borderRadius: '8px', color: '#cbd5e1' }}>
-                ✓ Agenten er nå trent på din kommunikasjonsstil og kan svare på e-poster
+              <div style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                <h3 style={{ marginBottom: '1rem', color: '#10b981' }}>Neste steg:</h3>
+                <ul style={{ listStyle: 'none', padding: 0 }}>
+                  <li style={{ padding: '0.5rem 0', color: '#cbd5e1' }}>1. Gå til Integrasjoner</li>
+                  <li style={{ padding: '0.5rem 0', color: '#cbd5e1' }}>2. Koble Gmail eller Outlook</li>
+                  <li style={{ padding: '0.5rem 0', color: '#cbd5e1' }}>3. Agenten begynner å behandle e-poster</li>
+                </ul>
               </div>
             </>
           )}
 
-          {/* Step 6: Gjennomgang */}
-          {step === 6 && (
-            <>
-              <h2 className="step-title">Gjennomgang</h2>
-              <p className="step-desc">Verifiser at alt er riktig</p>
-              
-              <div style={{ background: '#0f172a', padding: '1.5rem', borderRadius: '8px', border: '2px solid #334155', marginBottom: '1.5rem' }}>
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Bedrift</div>
-                  <div style={{ color: '#f1f5f9', fontWeight: 600 }}>{formData.companyName || 'Din Bedrift'}</div>
-                </div>
-
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Agent</div>
-                  <div style={{ color: '#f1f5f9', fontWeight: 600 }}>{formData.agentName || 'Thea'} ({formData.agentTone})</div>
-                </div>
-
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <div style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.5rem' }}>E-post</div>
-                  <div style={{ color: '#f1f5f9', fontWeight: 600 }}>{formData.primaryEmail || 'Ikke lagt inn'}</div>
-                </div>
-
-                {formData.integrations.length > 0 && (
-                  <div>
-                    <div style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Integrering</div>
-                    <div style={{ color: '#f1f5f9', fontWeight: 600 }}>{formData.integrations.join(', ')}</div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Step 7: Velkomst */}
-          {step === 7 && (
-            <>
-              <h2 className="step-title">Velkommen! 🎉</h2>
-              <p className="step-desc">Din AI email agent er nå klar</p>
-              
-              <div style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%)', padding: '2rem', borderRadius: '8px', border: '2px solid #10b981', textAlign: 'center', marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🚀</div>
-                <p style={{ color: '#f1f5f9', marginBottom: '1rem', fontSize: '1.1rem' }}>Oppsettet er komplett!</p>
-                <p style={{ color: '#cbd5e1' }}>Din agent svarer nå automatisk på e-poster. Gå til dashboarden for å monitor og fine-tune.</p>
-              </div>
-            </>
-          )}
-
-          <div className="step-counter">Steg {step} av 7</div>
-        </div>
-
-        <div className="onboarding-footer">
-          <button className="btn btn-secondary" onClick={handlePrev} disabled={step === 1}>
-            ← Tilbake
-          </button>
-          <button className="btn btn-primary" onClick={handleNext}>
-            {step === 7 ? 'Gå til dashboard' : 'Neste'} →
-          </button>
+          <div className="button-group">
+            {step > 1 && (
+              <button className="btn btn-secondary" onClick={handleBack}>
+                Tilbake
+              </button>
+            )}
+            <button 
+              className="btn btn-primary" 
+              onClick={handleNext}
+              style={{ marginLeft: step === 1 ? 'auto' : '0' }}
+            >
+              {step === 5 ? 'Gå til Dashboard' : 'Neste'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
