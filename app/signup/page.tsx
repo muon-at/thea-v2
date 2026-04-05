@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { signup } from '@/app/auth/actions';
+import { useRouter } from 'next/navigation';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -10,6 +10,7 @@ export default function Signup() {
   const [companyName, setCompanyName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,18 +18,24 @@ export default function Signup() {
     setError('');
 
     try {
-      const result = await signup(email, password, companyName);
-      // If signup is successful, it will redirect
-      // If we get here, there was an error
-      if (result?.error) {
-        setError(result.error);
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, displayName: companyName }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Signup failed');
+        setLoading(false);
+        return;
       }
+
+      // Success - redirect to onboarding
+      router.push('/onboarding');
     } catch (err: any) {
-      // Don't show error for redirects (Next.js throws NEXT_REDIRECT)
-      if (err?.message && !err.message.includes('NEXT_REDIRECT')) {
-        setError(err.message);
-      }
-    } finally {
+      setError(err.message || 'An error occurred');
       setLoading(false);
     }
   };
@@ -163,6 +170,7 @@ export default function Signup() {
               placeholder="du@bedrift.no"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
               disabled={loading}
             />
@@ -176,6 +184,7 @@ export default function Signup() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
               required
               disabled={loading}
             />

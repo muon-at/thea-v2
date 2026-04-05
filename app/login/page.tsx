@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { login } from '@/app/auth/actions';
+import { useRouter } from 'next/navigation';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,18 +17,24 @@ export default function Login() {
     setError('');
 
     try {
-      const result = await login(email, password);
-      // If login is successful, it will redirect
-      // If we get here, there was an error
-      if (result?.error) {
-        setError(result.error);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed');
+        setLoading(false);
+        return;
       }
+
+      // Success - redirect to dashboard
+      router.push('/dashboard');
     } catch (err: any) {
-      // Don't show error for redirects (Next.js throws NEXT_REDIRECT)
-      if (err?.message && !err.message.includes('NEXT_REDIRECT')) {
-        setError(err.message);
-      }
-    } finally {
+      setError(err.message || 'An error occurred');
       setLoading(false);
     }
   };
@@ -150,6 +157,7 @@ export default function Login() {
               placeholder="du@bedrift.no"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
               disabled={loading}
             />
@@ -163,6 +171,7 @@ export default function Login() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               required
               disabled={loading}
             />
