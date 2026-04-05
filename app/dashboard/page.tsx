@@ -6,7 +6,7 @@ export default function Dashboard() {
   const [selectedTab, setSelectedTab] = useState('overview');
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0f172a', color: '#f1f5f9' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0f172a', color: '#f1f5f9', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         .sidebar {
           width: 280px;
